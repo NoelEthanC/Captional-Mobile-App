@@ -1,5 +1,6 @@
 import Colors from "@/constants/colors";
 import type { PickedPhoto } from "@/hooks/usePhotoPicker";
+import { useResponsive } from "@/hooks/useResponsive";
 import React from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import Svg, { Line } from "react-native-svg";
@@ -11,9 +12,9 @@ type Props = {
   onSelectPhoto: (photo: PickedPhoto) => void;
 };
 
-function PlusIcon() {
+function PlusIcon({ size }: { size: number }) {
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Line
         x1="12"
         y1="5"
@@ -42,24 +43,36 @@ export default function RecentPhotos({
   onPickMore,
   onSelectPhoto,
 }: Props) {
+  const { rs, hp } = useResponsive();
+  const thumbSize = rs(72);
+  const thumbRadius = rs(14);
+
   return (
-    <View className="px-6 pb-8">
-      <Text className="text-xs font-semibold tracking-widest text-ink-muted uppercase mb-3">
+    <View style={{ paddingHorizontal: rs(24), paddingBottom: hp(0.05) }}>
+      <Text
+        className="font-semibold uppercase tracking-widest text-ink-muted"
+        style={{ fontSize: rs(11), letterSpacing: 1.8, marginBottom: rs(12) }}
+      >
         Recent
       </Text>
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-2"
+        contentContainerStyle={{ gap: rs(11) }}
       >
         {/* Loading skeletons */}
         {loading &&
           [0, 1, 2].map((i) => (
             <View
               key={i}
-              className="w-16 h-16 rounded-xl bg-overlay"
-              style={{ opacity: 1 - i * 0.25 }}
+              className="bg-overlay"
+              style={{
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbRadius,
+                opacity: 1 - i * 0.25,
+              }}
             />
           ))}
 
@@ -73,20 +86,30 @@ export default function RecentPhotos({
             >
               <Image
                 source={{ uri: photo.uri }}
-                className="w-16 h-16 rounded-xl bg-overlay"
+                className="bg-overlay"
+                style={{
+                  width: thumbSize,
+                  height: thumbSize,
+                  borderRadius: thumbRadius,
+                }}
                 resizeMode="cover"
               />
             </Pressable>
           ))}
 
-        {/* Empty placeholder tiles when loaded but no photos yet */}
+        {/* Empty placeholders */}
         {!loading &&
           photos.length === 0 &&
           [0, 1, 2].map((i) => (
             <View
               key={i}
-              className="w-16 h-16 rounded-xl bg-overlay"
-              style={{ opacity: 1 - i * 0.25 }}
+              className="bg-overlay"
+              style={{
+                width: thumbSize,
+                height: thumbSize,
+                borderRadius: thumbRadius,
+                opacity: 1 - i * 0.25,
+              }}
             />
           ))}
 
@@ -94,9 +117,16 @@ export default function RecentPhotos({
         {!loading && (
           <Pressable
             onPress={onPickMore}
-            className="w-16 h-16 rounded-xl border border-dashed border-ink-faint items-center justify-center active:opacity-70"
+            className="border-ink-faint items-center justify-center active:opacity-70"
+            style={{
+              width: thumbSize,
+              height: thumbSize,
+              borderRadius: thumbRadius,
+              borderWidth: 1.5,
+              borderStyle: "dashed",
+            }}
           >
-            <PlusIcon />
+            <PlusIcon size={rs(20)} />
           </Pressable>
         )}
       </ScrollView>

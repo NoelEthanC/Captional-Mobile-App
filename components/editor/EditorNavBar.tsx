@@ -1,3 +1,4 @@
+import { useResponsive } from "@/hooks/useResponsive";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -7,27 +8,38 @@ type Props = {
 };
 
 export default function EditorNavBar({ onBack, onNext }: Props) {
+  const { rs, hp } = useResponsive();
+
   return (
-    <View className="flex-row items-center justify-between px-4 py-3">
-      {/* Back */}
+    <View
+      className="flex-row items-center justify-between"
+      style={{ paddingHorizontal: rs(16), paddingVertical: hp(0.018) }}
+    >
       <Pressable
         onPress={onBack}
-        className="bg-void-soft rounded-full px-4 py-2 active:opacity-70"
+        className="bg-void-soft rounded-full active:opacity-70"
+        style={{ paddingHorizontal: rs(16), paddingVertical: rs(9) }}
       >
-        <Text className="text-canvas text-sm font-medium">← Back</Text>
+        <Text className="text-canvas font-medium" style={{ fontSize: rs(14) }}>
+          ← Back
+        </Text>
       </Pressable>
 
-      {/* Title */}
-      <Text className="text-ink-muted text-xs font-semibold tracking-widest uppercase">
+      <Text
+        className="text-ink-muted font-semibold uppercase tracking-widest"
+        style={{ fontSize: rs(11), letterSpacing: 2 }}
+      >
         Editor
       </Text>
 
-      {/* Next */}
       <Pressable
         onPress={onNext}
-        className="bg-canvas rounded-full px-4 py-2 active:opacity-70"
+        className="bg-canvas rounded-full active:opacity-70"
+        style={{ paddingHorizontal: rs(16), paddingVertical: rs(9) }}
       >
-        <Text className="text-ink text-sm font-bold">Next →</Text>
+        <Text className="text-ink font-bold" style={{ fontSize: rs(14) }}>
+          Next →
+        </Text>
       </Pressable>
     </View>
   );

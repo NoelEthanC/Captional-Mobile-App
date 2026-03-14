@@ -1,4 +1,5 @@
 import Colors from "@/constants/colors";
+import { useResponsive } from "@/hooks/useResponsive";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 
@@ -20,37 +21,44 @@ export default function OptionToggle<T extends string>({
   value,
   onChange,
 }: Props<T>) {
+  const { rs } = useResponsive();
+
   return (
-    <View className="gap-2">
-      {/* Section label */}
+    <View style={{ gap: rs(8) }}>
       <Text
-        className="text-xs font-semibold tracking-widest uppercase px-4"
-        style={{ color: Colors.inkMuted }}
+        className="font-semibold uppercase tracking-widest text-ink-muted"
+        style={{
+          fontSize: rs(11),
+          letterSpacing: 1.8,
+          paddingHorizontal: rs(16),
+        }}
       >
         {label}
       </Text>
 
-      {/* Toggle pills */}
-      <View className="flex-row px-4 gap-2">
+      <View
+        className="flex-row"
+        style={{ paddingHorizontal: rs(16), gap: rs(8) }}
+      >
         {options.map((opt) => {
           const isActive = opt.value === value;
           return (
             <Pressable
               key={opt.value}
               onPress={() => onChange(opt.value)}
-              className="flex-1 items-center justify-center py-2 rounded-xl active:opacity-70"
+              className={`flex-1 items-center justify-center active:opacity-70 ${
+                isActive ? "bg-canvas" : "bg-transparent"
+              }`}
               style={{
+                paddingVertical: rs(11),
+                borderRadius: rs(12),
                 borderWidth: 1,
                 borderColor: isActive ? Colors.canvas : Colors.voidBorder,
-                backgroundColor: isActive ? Colors.canvas : "transparent",
               }}
             >
               <Text
-                className="text-sm"
-                style={{
-                  color: isActive ? Colors.ink : Colors.inkMuted,
-                  fontWeight: isActive ? "700" : "400",
-                }}
+                className={isActive ? "text-ink font-bold" : "text-ink-muted"}
+                style={{ fontSize: rs(14) }}
               >
                 {opt.label}
               </Text>

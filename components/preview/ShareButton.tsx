@@ -1,6 +1,6 @@
+import { useResponsive } from "@/hooks/useResponsive";
 import React from "react";
 import { Pressable, Text } from "react-native";
-import Colors from "@/constants/colors";
 
 type Props = {
   onPress: () => void;
@@ -8,19 +8,20 @@ type Props = {
 };
 
 export default function ShareButton({ onPress, loading = false }: Props) {
+  const { rs } = useResponsive();
+
   return (
     <Pressable
       onPress={onPress}
       disabled={loading}
-      className="mx-4 h-12 rounded-full items-center justify-center active:opacity-70"
+      className="bg-overlay items-center justify-center active:opacity-70"
       style={{
-        backgroundColor: Colors.overlay,
+        marginHorizontal: rs(16),
+        height: rs(50),
+        borderRadius: rs(100),
       }}
     >
-      <Text
-        className="text-sm font-semibold"
-        style={{ color: Colors.ink }}
-      >
+      <Text className="text-ink font-semibold" style={{ fontSize: rs(15) }}>
         Share
       </Text>
     </Pressable>

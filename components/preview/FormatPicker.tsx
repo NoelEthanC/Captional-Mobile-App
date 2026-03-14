@@ -1,6 +1,7 @@
+import Colors from "@/constants/colors";
+import { useResponsive } from "@/hooks/useResponsive";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import Colors from "@/constants/colors";
 
 export type ImageFormat = "png" | "jpg";
 
@@ -15,32 +16,35 @@ const FORMATS: { label: string; value: ImageFormat }[] = [
 ];
 
 export default function FormatPicker({ value, onChange }: Props) {
+  const { rs } = useResponsive();
+
   return (
-    <View className="px-4 gap-3">
+    <View style={{ paddingHorizontal: rs(16), gap: rs(12) }}>
       <Text
-        className="text-xs font-semibold tracking-widest uppercase"
-        style={{ color: Colors.inkMuted }}
+        className="font-semibold uppercase tracking-widest text-ink-muted"
+        style={{ fontSize: rs(11), letterSpacing: 1.8 }}
       >
         Save As
       </Text>
 
-      <View className="flex-row gap-2">
+      <View className="flex-row" style={{ gap: rs(10) }}>
         {FORMATS.map((fmt) => {
           const isActive = fmt.value === value;
           return (
             <Pressable
               key={fmt.value}
               onPress={() => onChange(fmt.value)}
-              className="rounded-full px-5 py-2 active:opacity-70"
+              className={`rounded-full active:opacity-70 ${isActive ? "bg-ink" : "bg-transparent"}`}
               style={{
-                borderWidth:     1.5,
-                borderColor:     isActive ? Colors.ink : Colors.border,
-                backgroundColor: isActive ? Colors.ink : "transparent",
+                paddingHorizontal: rs(22),
+                paddingVertical: rs(10),
+                borderWidth: 1.5,
+                borderColor: isActive ? Colors.ink : Colors.border,
               }}
             >
               <Text
-                className="text-sm font-semibold"
-                style={{ color: isActive ? Colors.canvas : Colors.inkMuted }}
+                className={`font-semibold ${isActive ? "text-canvas" : "text-ink-muted"}`}
+                style={{ fontSize: rs(14) }}
               >
                 {fmt.label}
               </Text>

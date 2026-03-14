@@ -1,3 +1,4 @@
+import { useResponsive } from "@/hooks/useResponsive";
 import type {
   CaptionOverlay,
   CaptionPosition,
@@ -15,17 +16,12 @@ type Props = {
   overlay: CaptionOverlay;
 };
 
-// Flex alignment for the caption layer
 const positionStyle: Record<CaptionPosition, object> = {
   top: { justifyContent: "flex-start" },
   center: { justifyContent: "center" },
   bottom: { justifyContent: "flex-end" },
 };
 
-// LinearGradient colors per position:
-// top    → dark at top fading down to transparent
-// center → transparent → dark centre → transparent
-// bottom → transparent at top fading down to dark
 const gradientColors: Record<
   CaptionPosition,
   readonly [string, string, ...string[]]
@@ -38,9 +34,11 @@ const gradientColors: Record<
 function CaptionText({
   caption,
   style,
+  rs,
 }: {
   caption: string;
   style: CaptionStyle;
+  rs: (n: number) => number;
 }) {
   const isBold = style === "bold";
   const isQuote = style === "quote";
@@ -50,11 +48,11 @@ function CaptionText({
     <Text
       style={{
         color: "#FAFAFA",
-        fontSize: isBold ? 17 : isMinimal ? 13 : 15,
+        fontSize: isBold ? rs(17) : isMinimal ? rs(13) : rs(15),
         fontWeight: isBold ? "700" : "400",
         fontStyle: isQuote ? "italic" : "normal",
         fontFamily: isQuote ? "serif" : undefined,
-        lineHeight: isBold ? 24 : 20,
+        lineHeight: isBold ? rs(24) : rs(20),
         letterSpacing: isMinimal ? 0.4 : 0,
       }}
     >
@@ -70,22 +68,29 @@ export default function ImagePreview({
   style,
   overlay,
 }: Props) {
+  const { rs } = useResponsive();
   const showGradient = overlay === "gradient";
   const showBox = overlay === "box";
 
   return (
+    // flex:1 — fills all remaining vertical space between navbar and controls panel
     <View
-      className="mx-4 rounded-2xl overflow-hidden bg-void-soft"
-      style={{ height: 240 }}
+      className="bg-void-soft"
+      style={{
+        flex: 1,
+        marginHorizontal: rs(16),
+        borderRadius: rs(20),
+        overflow: "hidden",
+      }}
     >
-      {/* Photo */}
+      {/* Photo — cover the whole frame */}
       <Image
         source={{ uri }}
         style={{ position: "absolute", width: "100%", height: "100%" }}
         resizeMode="cover"
       />
 
-      {/* Gradient overlay — covers full frame, fades per position */}
+      {/* Gradient overlay */}
       {showGradient && (
         <LinearGradient
           colors={gradientColors[position]}
@@ -93,22 +98,27 @@ export default function ImagePreview({
         />
       )}
 
-      {/* Caption layer — positioned on top of gradient */}
-      <View className="absolute inset-0 p-4" style={positionStyle[position]}>
-        {/* Box overlay */}
+      {/* Caption layer */}
+      <View
+        className="absolute inset-0"
+        style={{ ...positionStyle[position], padding: rs(16) }}
+      >
         {showBox && caption.length > 0 && (
           <View
-            className="self-start rounded-xl px-3 py-2"
-            style={{ backgroundColor: "rgba(0,0,0,0.58)" }}
+            className="self-start rounded-xl"
+            style={{
+              paddingHorizontal: rs(12),
+              paddingVertical: rs(8),
+              backgroundColor: "rgba(0,0,0,0.58)",
+            }}
           >
-            <CaptionText caption={caption} style={style} />
+            <CaptionText caption={caption} style={style} rs={rs} />
           </View>
         )}
 
-        {/* Bare / gradient caption */}
         {!showBox && caption.length > 0 && (
-          <View className="px-1">
-            <CaptionText caption={caption} style={style} />
+          <View style={{ paddingHorizontal: rs(4) }}>
+            <CaptionText caption={caption} style={style} rs={rs} />
           </View>
         )}
       </View>

@@ -2,14 +2,17 @@ import CaptionInput from "@/components/editor/CaptionInput";
 import EditorControls from "@/components/editor/EditorControls";
 import EditorNavBar from "@/components/editor/EditorNavBar";
 import ImagePreview from "@/components/editor/ImagePreview";
+import EmptyState from "@/components/ui/EmptyState";
 import SafeScreen from "@/components/ui/SafeScreen";
+import { useAndroidBack } from "@/hooks/useAndroidBack";
 import { useEditorState } from "@/hooks/useEditorState";
+import { useResponsive } from "@/hooks/useResponsive";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-
 export default function EditorScreen() {
   const router = useRouter();
+  const { rs, hp } = useResponsive();
   const params = useLocalSearchParams<{
     uri: string;
     width: string;
@@ -47,37 +50,54 @@ export default function EditorScreen() {
     });
   };
 
+  const handleBack = () => router.back();
+
+  // Android hardware back — confirm before discarding caption work
+  useAndroidBack({
+    onBack: handleBack,
+    confirm: caption.length > 0, // only confirm if user has typed something
+    confirmTitle: "Discard caption?",
+    confirmMessage: "Going back will lose your caption and settings.",
+  });
+
+  // ── Guard: no photo uri means something went wrong upstream ──
+  if (!params.uri) {
+    return (
+      <SafeScreen dark>
+        <EmptyState onGoBack={handleBack} />
+      </SafeScreen>
+    );
+  }
+
   return (
     <SafeScreen dark>
-      {/* KeyboardAvoidingView pushes content up when keyboard opens */}
       <KeyboardAvoidingView
-        className="flex-1"
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
       >
-        {/* NavBar sits outside scroll — always visible */}
-        <EditorNavBar onBack={() => router.back()} onNext={handleNext} />
+        {/* ── Top: NavBar (fixed) ── */}
+        {/* <EditorNavBar onBack={() => router.back()} onNext={handleNext} /> */}
+        <EditorNavBar onBack={handleBack} onNext={handleNext} />
+        {/* ── Middle: Image preview — grows to fill remaining space ── */}
+        <ImagePreview
+          uri={snapshot.uri}
+          caption={caption}
+          position={position}
+          style={style}
+          overlay={overlay}
+        />
 
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="gap-4 pb-8"
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Live preview */}
-          <ImagePreview
-            uri={snapshot.uri}
-            caption={caption}
-            position={position}
-            style={style}
-            overlay={overlay}
-          />
-
-          {/* Caption text input */}
-          <CaptionInput value={caption} onChange={setCaption} />
-
-          {/* Position / Style / Overlay toggles */}
-          <View className="gap-4 pt-2">
+        {/* ── Bottom: Controls panel — always pinned, scrolls internally ── */}
+        <View style={{ paddingTop: rs(10) }}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ gap: rs(16), paddingBottom: hp(0.03) }}
+            // Cap the panel height so the image always stays visible
+            // style={{ maxHeight: hp(0.42) }}
+          >
+            <CaptionInput value={caption} onChange={setCaption} />
             <EditorControls
               position={position}
               style={style}
@@ -86,8 +106,8 @@ export default function EditorScreen() {
               onStyleChange={setStyle}
               onOverlayChange={setOverlay}
             />
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
       </KeyboardAvoidingView>
     </SafeScreen>
   );
