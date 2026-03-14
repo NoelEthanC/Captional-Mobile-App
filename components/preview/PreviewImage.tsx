@@ -1,6 +1,11 @@
+import type {
+  CaptionOverlay,
+  CaptionPosition,
+  CaptionStyle,
+} from "@/types/editor";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { forwardRef } from "react";
 import { Image, Text, View } from "react-native";
-import type { CaptionOverlay, CaptionPosition, CaptionStyle } from "@/types/editor";
 
 type Props = {
   uri: string;
@@ -11,9 +16,18 @@ type Props = {
 };
 
 const positionStyle: Record<CaptionPosition, object> = {
-  top:    { justifyContent: "flex-start" },
+  top: { justifyContent: "flex-start" },
   center: { justifyContent: "center" },
   bottom: { justifyContent: "flex-end" },
+};
+
+const gradientColors: Record<
+  CaptionPosition,
+  readonly [string, string, ...string[]]
+> = {
+  top: ["rgba(0,0,0,0.78)", "rgba(0,0,0,0.0)"],
+  center: ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.55)", "rgba(0,0,0,0.0)"],
+  bottom: ["rgba(0,0,0,0.0)", "rgba(0,0,0,0.78)"],
 };
 
 function CaptionText({
@@ -23,19 +37,19 @@ function CaptionText({
   caption: string;
   style: CaptionStyle;
 }) {
-  const isBold    = style === "bold";
-  const isQuote   = style === "quote";
+  const isBold = style === "bold";
+  const isQuote = style === "quote";
   const isMinimal = style === "minimal";
 
   return (
     <Text
       style={{
-        color:        "#FAFAFA",
-        fontSize:     isBold ? 18 : isMinimal ? 13 : 15,
-        fontWeight:   isBold ? "700" : "400",
-        fontStyle:    isQuote ? "italic" : "normal",
-        fontFamily:   isQuote ? "serif" : undefined,
-        lineHeight:   isBold ? 26 : 21,
+        color: "#FAFAFA",
+        fontSize: isBold ? 18 : isMinimal ? 13 : 15,
+        fontWeight: isBold ? "700" : "400",
+        fontStyle: isQuote ? "italic" : "normal",
+        fontFamily: isQuote ? "serif" : undefined,
+        lineHeight: isBold ? 26 : 21,
         letterSpacing: isMinimal ? 0.5 : 0,
       }}
     >
@@ -48,7 +62,7 @@ function CaptionText({
 const PreviewImage = forwardRef<View, Props>(
   ({ uri, caption, position, style, overlay }, ref) => {
     const showGradient = overlay === "gradient";
-    const showBox      = overlay === "box";
+    const showBox = overlay === "box";
 
     return (
       <View
@@ -71,9 +85,9 @@ const PreviewImage = forwardRef<View, Props>(
         >
           <Text
             style={{
-              color:         "#FAFAFA",
-              fontSize:      10,
-              fontWeight:    "700",
+              color: "#FAFAFA",
+              fontSize: 10,
+              fontWeight: "700",
               letterSpacing: 1.2,
             }}
           >
@@ -82,25 +96,17 @@ const PreviewImage = forwardRef<View, Props>(
         </View>
 
         {/* Caption layer */}
-        <View
-          className="absolute inset-0 p-4"
-          style={positionStyle[position]}
-        >
+        <View className="absolute inset-0 p-4" style={positionStyle[position]}>
           {/* Gradient overlay */}
           {showGradient && (
-            <View
+            <LinearGradient
+              colors={gradientColors[position]}
               style={{
                 position: "absolute",
-                left: 0, right: 0,
-                ...(position === "bottom"
-                  ? { bottom: 0, height: "55%" }
-                  : position === "top"
-                  ? { top: 0, height: "55%" }
-                  : { top: 0, bottom: 0 }),
-                backgroundColor:
-                  position === "center"
-                    ? "rgba(0,0,0,0.35)"
-                    : "rgba(0,0,0,0.62)",
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
               }}
             />
           )}
@@ -124,7 +130,7 @@ const PreviewImage = forwardRef<View, Props>(
         </View>
       </View>
     );
-  }
+  },
 );
 
 PreviewImage.displayName = "PreviewImage";

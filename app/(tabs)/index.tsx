@@ -10,7 +10,7 @@ import { ScrollView, View } from "react-native";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { pickPhoto, recentPhotos } = usePhotoPicker();
+  const { pickPhoto, recentPhotos, loadingRecents } = usePhotoPicker();
   const [loading, setLoading] = useState(false);
 
   const handlePickPhoto = async () => {
@@ -51,6 +51,7 @@ export default function HomeScreen() {
         {/* Bottom section — recent photos */}
         <RecentPhotos
           photos={recentPhotos}
+          loading={loadingRecents}
           onPickMore={handlePickPhoto}
           onSelectPhoto={handleSelectRecent}
         />

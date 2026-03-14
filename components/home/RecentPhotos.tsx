@@ -6,6 +6,7 @@ import Svg, { Line } from "react-native-svg";
 
 type Props = {
   photos: PickedPhoto[];
+  loading?: boolean;
   onPickMore: () => void;
   onSelectPhoto: (photo: PickedPhoto) => void;
 };
@@ -37,6 +38,7 @@ function PlusIcon() {
 
 export default function RecentPhotos({
   photos,
+  loading = false,
   onPickMore,
   onSelectPhoto,
 }: Props) {
@@ -51,22 +53,35 @@ export default function RecentPhotos({
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="gap-2"
       >
-        {photos.map((photo, index) => (
-          <Pressable
-            key={`${photo.uri}-${index}`}
-            onPress={() => onSelectPhoto(photo)}
-            className="active:opacity-70"
-          >
-            <Image
-              source={{ uri: photo.uri }}
+        {/* Loading skeletons */}
+        {loading &&
+          [0, 1, 2].map((i) => (
+            <View
+              key={i}
               className="w-16 h-16 rounded-xl bg-overlay"
-              resizeMode="cover"
+              style={{ opacity: 1 - i * 0.25 }}
             />
-          </Pressable>
-        ))}
+          ))}
 
-        {/* Empty placeholder tiles when no photos yet */}
-        {photos.length === 0 &&
+        {/* Actual photos */}
+        {!loading &&
+          photos.map((photo, index) => (
+            <Pressable
+              key={`${photo.uri}-${index}`}
+              onPress={() => onSelectPhoto(photo)}
+              className="active:opacity-70"
+            >
+              <Image
+                source={{ uri: photo.uri }}
+                className="w-16 h-16 rounded-xl bg-overlay"
+                resizeMode="cover"
+              />
+            </Pressable>
+          ))}
+
+        {/* Empty placeholder tiles when loaded but no photos yet */}
+        {!loading &&
+          photos.length === 0 &&
           [0, 1, 2].map((i) => (
             <View
               key={i}
@@ -76,12 +91,14 @@ export default function RecentPhotos({
           ))}
 
         {/* Add more button */}
-        <Pressable
-          onPress={onPickMore}
-          className="w-16 h-16 rounded-xl border border-dashed border-ink-faint items-center justify-center active:opacity-70"
-        >
-          <PlusIcon />
-        </Pressable>
+        {!loading && (
+          <Pressable
+            onPress={onPickMore}
+            className="w-16 h-16 rounded-xl border border-dashed border-ink-faint items-center justify-center active:opacity-70"
+          >
+            <PlusIcon />
+          </Pressable>
+        )}
       </ScrollView>
     </View>
   );
